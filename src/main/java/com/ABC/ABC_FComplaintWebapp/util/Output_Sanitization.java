@@ -1,0 +1,108 @@
+package com.ABC.ABC_FComplaintWebapp.util;
+
+import org.apache.commons.text.StringEscapeUtils;
+import org.springframework.stereotype.Component;
+
+/**
+ * SECURITY FIX_002: Output Sanitization & HTML Escaping Utility
+ * Weakness ID: Wk_002
+ * Fix ID: Fix_002 – Output Transformation Validation (OTV) with HTML Escaping
+ * STRIDE: Tampering, Information Disclosure
+ * OWASP: A03 Injection, A07 Cross-Site Scripting (XSS)
+ * CWE: CWE-79, CWE-80
+ * CIA: Integrity, Confidentiality
+ * ASVS: V5.3 – Output Encoding & V5.1 – Input Validation
+ * D3FEND: D3-OTV Output Transformation Validation
+ *
+ * Implementation Details:
+ * - Context-appropriate output encoding for HTML, JavaScript, URL, and CSS contexts
+ * - Used in both template rendering and administrative interfaces
+ */
+@Component
+public class Output_Sanitization {
+
+    /**
+     * HTML escape - safe for HTML content
+     * Escapes: <, >, &, ", '
+     */
+    public static String escapeHtml(String input) {
+        if (input == null) {
+            return "";
+        }
+        return StringEscapeUtils.escapeHtml4(input);
+    }
+
+    
+    public static String escapeJavaScript(String input) {
+        if (input == null) {
+            return "";
+        }
+        return StringEscapeUtils.escapeEcmaScript(input);
+    }
+
+    public static String escapeUrl(String input) {
+        if (input == null) {
+            return "";
+        }
+        // Use standard URL encoding from Java
+        try {
+            return java.net.URLEncoder.encode(input, "UTF-8");
+        } catch (java.io.UnsupportedEncodingException e) {
+            return input;
+        }
+    }
+
+  
+    public static String escapeCss(String input) {
+        if (input == null) {
+            return "";
+        }
+        // Basic CSS escaping - escape quotes and dangerous characters
+        return input.replaceAll("['\"]", "\\\\$0")
+                   .replaceAll("[<>\\\\]", "\\\\$0");
+    }
+
+    
+    public static String escapeXml(String input) {
+        if (input == null) {
+            return "";
+        }
+        return StringEscapeUtils.escapeXml11(input);
+    }
+
+  
+    public static String sanitize(String input) {
+        if (input == null) {
+            return "";
+        }
+        // Default to HTML escaping for web view rendering
+        return StringEscapeUtils.escapeHtml4(input);
+    }
+
+   
+
+        // Size validation
+        switch (fieldType) {
+            case "title":
+                sanitized = sanitizeAndTruncate(sanitized, 255);
+                break;
+            case "description":
+                sanitized = sanitizeAndTruncate(sanitized, 5000);
+                break;
+            case "category":
+                sanitized = sanitizeAndTruncate(sanitized, 100);
+                break;
+            case "status":
+                sanitized = sanitizeAndTruncate(sanitized, 50);
+                break;
+            case "response":
+                sanitized = sanitizeAndTruncate(sanitized, 5000);
+                break;
+            default:
+                sanitized = sanitizeAndTruncate(sanitized, 1000);
+        }
+
+        // HTML escape all complaint fields
+        return escapeHtml(sanitized);
+    }
+}
